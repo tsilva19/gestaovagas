@@ -1,2 +1,18 @@
-package br.com.tasifyi.gestao_vagas.modules.candidate.dto;public class AuthCandidateResponseDTO {
+package br.com.tasifyi.gestao_vagas.modules.candidate.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.sql.Date;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuthCandidateResponseDTO {
+
+    private String acess_token;
+    private Long expires_in;
 }
