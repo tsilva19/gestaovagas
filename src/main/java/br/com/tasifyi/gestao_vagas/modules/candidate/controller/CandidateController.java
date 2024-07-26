@@ -3,6 +3,7 @@ package br.com.tasifyi.gestao_vagas.modules.candidate.controller;
 import br.com.tasifyi.gestao_vagas.exceptions.UserFoundException;
 import br.com.tasifyi.gestao_vagas.modules.candidate.CandidateRepository;
 import br.com.tasifyi.gestao_vagas.modules.candidate.dto.ProfileCandidateResponseDTO;
+import br.com.tasifyi.gestao_vagas.modules.candidate.useCases.ApplyJobCandidateUseCase;
 import br.com.tasifyi.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.tasifyi.gestao_vagas.modules.candidate.useCases.ListAllJobsByFilterUseCase;
 import br.com.tasifyi.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
@@ -41,13 +42,16 @@ public class CandidateController {
     @Autowired
     private ListAllJobsByFilterUseCase listAllJobsByFilterUseCase;
 
+    @Autowired
+    private ApplyJobCandidateUseCase applyJobCandidateUseCase;
+
     @PostMapping("/")
     @Operation(summary = "Cadastro de Candidato", description = "Responsavel por cadastrar um candidato")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {
                     @Content(schema = @Schema(implementation = CandidateEntity.class))
             }),
-            @ApiResponse(responseCode = "400", description = "Usuário Já Existe")
+            @ApiResponse(responseCode = "400", description = "Usuário Já Existe ")
     })
     public ResponseEntity<Object> create(@Valid @RequestBody CandidateEntity candidateEntity) {
         try{
@@ -96,5 +100,22 @@ public class CandidateController {
         return this.listAllJobsByFilterUseCase.execute(filter);
     }
 
+    @PostMapping("/job/apply")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    @SecurityRequirement(name = "jwt_auth")
+    @Operation(summary = "Inscrição do candidado para uma vaga ",
+            description = "Função responsavel  por realizar a incrição do candidato")
+    public ResponseEntity<Object> applyJob(HttpServletRequest request, @RequestBody UUID idJob){
+
+        var idCandidate = request.getAttribute("candidate_id");
+
+        try {
+            var result = this.applyJobCandidateUseCase.execute(UUID.fromString(idCandidate.toString()), idJob);
+            return ResponseEntity.ok().body(result);
+        } catch (Exception e) {
+            return  ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
     
 }
